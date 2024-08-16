@@ -41,7 +41,7 @@ func main() {
 	srv := &http.Server{
 		Addr: *addr,
 		ErrorLog: errorLog,
-		Handler: mux,
+		Handler: app.routes(),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
@@ -49,3 +49,8 @@ func main() {
 	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
+
+// // Responsibilities of the main func:
+// Parsing the runtime configuration settings for the application;
+// Establishing the dependencies for the handlers; and
+// Running the HTTP server.
