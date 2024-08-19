@@ -59,5 +59,19 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Some variables with a dummy data
+	title := "O snail"
+	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!"
+	expires := "7"
+	// To pass the data to the SnippetModel.Insert() method, by receiving the ID of the bew record back
+	id, err := app.snippets.Insert(title, content, expires)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// To redirect the user to the relevant page of the snippet
+	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+
 	w.Write([]byte("Create a new snippet..."))
 }
