@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"snippet-box/pkg/models/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -14,14 +15,17 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog * log.Logger
+	// To make the SnippetModel object available to the handlers
+	snippets *mysql.SnippetModel
 }
 
 func main() {
-	// To define a new command-line flag with the name 'addr',
-	addr := flag.String("addr", ":4000", "HTTP network address")
 	// Tpo create DB Connection Pool
 	dsn := flag.String("dsn", "web:webpassword@/snippetbox?parseTime=true", "MySQL database")
+	// To define a new command-line flag with the name 'addr',
+	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
+
 	// To create a logger for writing information messages
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	// To create a logger for writing error messages
@@ -37,6 +41,8 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog: infoLog,
+		// To initialize a mysql.SnippetModel instance & add i the application dependencies
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 
 	// Swapped the route declarations to use the application struct's method
