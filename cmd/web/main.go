@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // To define an application struct to hold the application-wide dependencies
@@ -16,11 +19,20 @@ type application struct {
 func main() {
 	// To define a new command-line flag with the name 'addr',
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	// Tpo create DB Connection Pool
+	dsn := flag.String("dsn", "web:webpassword@/snippetbox?parseTime=true", "MySQL database")
 	flag.Parse()
 	// To create a logger for writing information messages
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	// To create a logger for writing error messages
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	db, err := openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	// To close the connection pool before the main() function exists
+	defer db.Close()
 
 	app := &application{
 		errorLog: errorLog,
@@ -42,15 +54,22 @@ func main() {
 		Addr: *addr,
 		ErrorLog: errorLog,
 		Handler: app.routes(),
-	}
+	} 
 
 	infoLog.Printf("Starting server on %s", *addr)
 	// To call the ListenAndServe method on the new http.Server struct
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
 
-// // Responsibilities of the main func:
-// Parsing the runtime configuration settings for the application;
-// Establishing the dependencies for the handlers; and
-// Running the HTTP server.
+// The openDB() function wraps sql.Open() and returns a sql.DB connection pool for a given DSN
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	return db, nil
+}
