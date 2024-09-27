@@ -71,6 +71,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// To use the render helper function
+	app.render(w, r, "show.page.tmpl", &templateData{
+		Snippet: s,
+	})
+
 	// To create an instance of a templateData struct holding the snippet data
 	data := &templateData{Snippet: s}
 
