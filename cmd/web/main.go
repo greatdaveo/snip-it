@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,8 @@ type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
 	// To make the SnippetModel object available to the handlers
-	snippets *mysql.SnippetModel
+	snippets      *mysql.SnippetModel
+	templateCache map[string]*template.Template // templateCache field
 }
 
 func main() {
@@ -38,11 +40,18 @@ func main() {
 	// To close the connection pool before the main() function exists
 	defer db.Close()
 
+	// To initialize a new template cache
+	templateCache, err := newTemplateCache("./ui/html")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
 		// To initialize a mysql.SnippetModel instance & add i the application dependencies
-		snippets: &mysql.SnippetModel{DB: db},
+		snippets:      &mysql.SnippetModel{DB: db},
+		templateCache: templateCache, // templateCache
 	}
 
 	// Swapped the route declarations to use the application struct's method
