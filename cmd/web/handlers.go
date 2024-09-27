@@ -51,13 +51,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 // Changed the signature of the showSnippet handler so it is defined as a method against *application & // To show snippet
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
+	// To get the id from the URL
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
 	}
 
-	// fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+	// To fetch the snippet data from the DB
 	s, err := app.snippets.Get(id)
 	if err == models.ErrNoRecord {
 		app.notFound(w)
@@ -67,21 +68,24 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// To initialize a slice containing the paths to the show.page.tmpl file
+	// To create an instance of a templateData struct holding the snippet data
+	data := &templateData{Snippet: s}
+
+	// To initialize a slice containing the paths to the template files
 	files := []string{
 		"./ui/html/show.page.tmpl",
 		"./ui/html/base.layout.tmpl",
 		"./ui/html/footer.partial.tmpl",
 	}
 
-	// To Parse the template files...
+	// To load the templates from the file paths
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-
-	err = ts.Execute(w, s)
+	// To execute the template set
+	err = ts.Execute(w, data)
 	if err != nil {
 		app.serverError(w, err)
 	}

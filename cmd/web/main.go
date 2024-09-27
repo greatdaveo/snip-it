@@ -14,7 +14,7 @@ import (
 // To define an application struct to hold the application-wide dependencies
 type application struct {
 	errorLog *log.Logger
-	infoLog * log.Logger
+	infoLog  *log.Logger
 	// To make the SnippetModel object available to the handlers
 	snippets *mysql.SnippetModel
 }
@@ -40,7 +40,7 @@ func main() {
 
 	app := &application{
 		errorLog: errorLog,
-		infoLog: infoLog,
+		infoLog:  infoLog,
 		// To initialize a mysql.SnippetModel instance & add i the application dependencies
 		snippets: &mysql.SnippetModel{DB: db},
 	}
@@ -57,10 +57,10 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	srv := &http.Server{
-		Addr: *addr,
+		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler: app.routes(),
-	} 
+		Handler:  app.routes(),
+	}
 
 	infoLog.Printf("Starting server on %s", *addr)
 	// To call the ListenAndServe method on the new http.Server struct

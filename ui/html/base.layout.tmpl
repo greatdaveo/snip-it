@@ -14,7 +14,8 @@
       <a href="/">Home</a>
     </nav>
     <section>
-      {{template "body" .}}
+      <!-- This is where the body content will be inserted -->
+      {{block "body" .}}{{end}}
     </section>
     {{template "footer" .}}
     <script src="/static/js/main.js" type="text/javascript"></script>
