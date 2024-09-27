@@ -23,9 +23,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range s {
-		fmt.Fprintf(w, "%v\n", snippet)
-	}
+	// for _, snippet := range s {
+	// 	fmt.Fprintf(w, "%v\n", snippet)
+	// }
+
+	// To create an instance of a templateData struct holding the slice of snippets
+	data := &templateData{Snippets: s}
 
 	// To initialize a slice containing the paths to the two files
 	files := []string{
@@ -42,7 +45,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// To write the template content as the response body
-	err = ts.Execute(w, nil) // second parameter is the data to be pass in
+	err = ts.Execute(w, data) // second parameter is the data to be pass in i.e templateData
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
