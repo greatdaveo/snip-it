@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"path/filepath"
 	"snippet-box/pkg/models"
+	"time"
 )
 
 // To set the holding structure for any dynamic data to be passed to HTML templates
@@ -13,6 +14,11 @@ type templateData struct {
 	Snippet     *models.Snippet // A pointer to a single Snippet from models package
 	// To include a Snippets field in the templateData struct
 	Snippets []*models.Snippet // A slice of Snippet pointers, holding multiple snippets
+}
+
+// Human Date Function
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
 }
 
 // To create an in memory map to cache the templates
