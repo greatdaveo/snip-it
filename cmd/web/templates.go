@@ -8,7 +8,9 @@ import (
 
 // To set the holding structure for any dynamic data to be passed to HTML templates
 type templateData struct {
-	Snippet *models.Snippet // A pointer to a single Snippet from models package
+	// Field for Current Year
+	CurrentYear int
+	Snippet     *models.Snippet // A pointer to a single Snippet from models package
 	// To include a Snippets field in the templateData struct
 	Snippets []*models.Snippet // A slice of Snippet pointers, holding multiple snippets
 }
