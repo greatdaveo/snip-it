@@ -2,6 +2,7 @@ package main
 
 import "net/http"
 
+// The flow of control: logRequest -> secureHeaders -> servemux -> application handler
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.home)
@@ -11,5 +12,5 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	return secureHeaders(mux)
+	return app.logRequest(secureHeaders(mux))
 }
