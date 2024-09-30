@@ -11,11 +11,6 @@ import (
 
 // Changed the signature of the home handler so it is defined as a method against the application
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	// To check if the request URL path matches "/"
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
 
 	s, err := app.snippets.Latest()
 	if err != nil {
@@ -99,18 +94,18 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
 // To add a snippet
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Set("Allow", "POST")
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
 
 	// Some variables with a dummy data
 	title := "O snail"
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!"
 	expires := "7"
+
 	// To pass the data to the SnippetModel.Insert() method, by receiving the ID of the bew record back
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
@@ -118,8 +113,8 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// To redirect the user to the relevant page of the snippet
-	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+	// To redirect the user to the relevant page of the snippet using semantic URL style
+	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 
 	w.Write([]byte("Create a new snippet..."))
 }
