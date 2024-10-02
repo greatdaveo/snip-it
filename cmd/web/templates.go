@@ -30,12 +30,13 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	// Loop through the pages one by one
 	for _, page := range pages {
 		// extract each file name, from the full file path & assign it to the name variable
 		name := filepath.Base(page)
 		// Parse the page template in to a template set
-		ts, err := template.ParseFiles(name)
+		ts, err := template.ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
@@ -51,8 +52,16 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 			return nil, err
 		}
 
+		// for k := range cache {
+		// 	fmt.Println("Template in cache:", k)
+		// }
+
 		// To add the template set to the cache, using the name of the page e.g home.page.tmpl as the key
 		cache[name] = ts
+
+		// To know the cached templates
+		// fmt.Println("Template in cache:", name)
+
 	}
 
 	return cache, nil

@@ -43,6 +43,12 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	// To add default data (like current year) to the template data
 	td = app.addDefaultData(td, r)
 
+	// To get templates in cache
+	// fmt.Println("Available templates in cache:")
+	// for k := range app.templateCache {
+	// 	fmt.Println(k)
+	// }
+
 	// To fetch the template from the cache
 	ts, ok := app.templateCache[name]
 	if !ok {
