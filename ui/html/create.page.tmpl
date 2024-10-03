@@ -1,23 +1,48 @@
 {{template "base" .}}
-{{define "title"}}Create a New Snippet{{end}}
+
+{{define "title"}}
+Create a New Snippet
+{{end}}
+
 {{define "body"}}
-<form action='/snippet/create' method='POST'>
+    <form action='/snippet/create' method='POST'>
+        {{with .Form}}
+        
+        <!-- Title Field -->
         <div>
             <label>Title:</label>
-            <input type='text' name='title'>
+            {{with .Errors.Get "title"}}
+                <label class='error'>{{.}}</label>
+            {{end}}
+            <input type='text' name='title' value='{{.Get "title"}}'>
         </div>
+
+        <!-- Content Field -->
         <div>
             <label>Content:</label>
-            <textarea name='content'></textarea>
+            {{with .Errors.Get "content"}}
+                <label class='error'>{{.}}</label>
+            {{end}}
+            <textarea name='content'>{{.Get "content"}}</textarea>
         </div>
+
+        <!-- Expires Field -->
         <div>
             <label>Delete in:</label>
-            <input type='radio' name='expires' value='365' checked> One Year
-            <input type='radio' name='expires' value='7'> One Week
-            <input type='radio' name='expires' value='1'> One Day
+            {{with .Errors.Get "expires"}}
+                <label class='error'>{{.}}</label>
+            {{end}}
+            {{$exp := or (.Get "expires") "365"}}
+            <input type='radio' name='expires' value='365' {{if eq $exp "365"}}checked{{end}}> 365 days
+            <input type='radio' name='expires' value='7' {{if eq $exp "7"}}checked{{end}}> 7 days
+            <input type='radio' name='expires' value='1' {{if eq $exp "1"}}checked{{end}}> 1 day
         </div>
+
+        <!-- Submit Button -->
         <div>
             <input type='submit' value='Publish snippet'>
         </div>
-</form>
+
+        {{end}}
+    </form>
 {{end}}

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"snippet-box/pkg/forms"
 	"snippet-box/pkg/models"
 	"strconv"
 )
@@ -96,9 +97,12 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// // To render the snippet form page
+// To render the snippet form page
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "create.page.tmpl", nil)
+	app.render(w, r, "create.page.tmpl", &templateData{
+		// To pass a new empty forms.forms object to the templte
+		Form: forms.New(nil),
+	})
 }
 
 // To add a snippet
@@ -111,18 +115,30 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// To retrieve the relevant data fields from the r.PostForm map
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	expiresStr := r.PostForm.Get("expires")
-	// Convert expires to int
+	// To create a new forms.Form struct containing the POSTed data from the form, and using the validation method to check the content
+	form := forms.New(r.PostForm)
+	form.Required("title", "content", "expires")
+	form.MaxLength("title", 100)
+	form.PermittedValues("expires", "367", "7", "1")
+
+	// If the form isn't valid, redisplay the template passing in the form.Form object as the data
+	if !form.Valid() {
+		app.render(w, r, "create.page.tmpl", &templateData{Form: form})
+		return
+	}
+
+	// To retrieve the validated fields values from the form
+	title := form.Get("title")
+	content := form.Get("content")
+	expiresStr := form.Get("expires")
+	//To convert expires to int
 	expires, err := strconv.Atoi(expiresStr)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	// To create a new snippet record in the database using the form data & convert expires back to a string if app.snippets.Insert expects a string
+	// To insert the snippet validated data in the DB
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)

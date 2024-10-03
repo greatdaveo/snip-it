@@ -3,14 +3,15 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"snippet-box/pkg/forms"
 	"snippet-box/pkg/models"
 	"time"
 )
 
 // To set the holding structure for any dynamic data to be passed to HTML templates
 type templateData struct {
-	// Field for Current Year
-	CurrentYear int
+	CurrentYear int             // Field for Current Year
+	Form        *forms.Form     // Pointer to single form field
 	Snippet     *models.Snippet // A pointer to a single Snippet from models package
 	// To include a Snippets field in the templateData struct
 	Snippets []*models.Snippet // A slice of Snippet pointers, holding multiple snippets
