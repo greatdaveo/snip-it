@@ -11,7 +11,7 @@ type SnippetModel struct {
 }
 
 // To insert a new snippet into the database
-func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
+func (m *SnippetModel) Insert(title, content string, expires int) (int, error) {
 	// The SQL statement to be executed
 	stmt := `INSERT INTO snippets (title, content, created, expires) 
 		 VALUES (?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
@@ -38,7 +38,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	// To initialize a pointer to a new zeroed snippet struct
 	s := &models.Snippet{}
 	// To copy the values from each field in sql.Row to the corresponding field
-	err := row.Scan(&s.ID, &s.Title, &s.Created, &s.Expires)
+	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 	if err == sql.ErrNoRows {
 		return nil, models.ErrNoRecord
 	} else if err != nil {

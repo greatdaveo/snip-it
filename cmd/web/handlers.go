@@ -49,8 +49,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 // Changed the signature of the showSnippet handler so it is defined as a method against *application & // To show snippet
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	// To get the id from the URL
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	//  To extract the ID from the URL path
+	idStr := r.URL.Path[len("/snippet/"):]
+	// To convert to int
+	id, err := strconv.Atoi(idStr)
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -102,12 +104,25 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 // To add a snippet
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
-	// Some variables with a dummy data
-	title := "O snail"
-	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!"
-	expires := "7"
+	// To parse the form data in POST, PUT & PATCH request bodies to the r.PostForm map
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	// To pass the data to the SnippetModel.Insert() method, by receiving the ID of the bew record back
+	// To retrieve the relevant data fields from the r.PostForm map
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expiresStr := r.PostForm.Get("expires")
+	// Convert expires to int
+	expires, err := strconv.Atoi(expiresStr)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// To create a new snippet record in the database using the form data & convert expires back to a string if app.snippets.Insert expects a string
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
@@ -116,6 +131,4 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// To redirect the user to the relevant page of the snippet using semantic URL style
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
-
-	w.Write([]byte("Create a new snippet..."))
 }
