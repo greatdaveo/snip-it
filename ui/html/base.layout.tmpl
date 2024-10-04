@@ -17,8 +17,11 @@
       <a href="/snippet/create">Create snippet</a>
     </nav>
     <section>
-      <!-- This is where the body content will be inserted -->
-      {{template "body" .}}
+        <!-- This is where the body content will be inserted -->
+        {{with .Flash}}
+        <div class='flash '>{{.}}</div>
+        {{end}}
+        {{template "body" .}}
     </section>
     {{template "footer" .}}
     <script src="/static/js/main.js" type="text/javascript"></script>

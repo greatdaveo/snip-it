@@ -27,14 +27,17 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
-// For
+// To add default data to the application
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
 	if td == nil {
 		td = &templateData{}
 	}
 
 	td.CurrentYear = time.Now().Year()
-	// app.infoLog.Printf("Current Year:  %d", td.CurrentYear)
+
+	// To add add the flash message to the template data, if on exists
+	td.Flash = app.session.PopString(r, "flash")
+
 	return td
 }
 

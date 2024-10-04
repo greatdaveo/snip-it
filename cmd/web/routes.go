@@ -16,10 +16,10 @@ func (app *application) routes() http.Handler {
 	dynamicMiddleware := alice.New(app.session.Enable)
 
 	mux := pat.New()
-	mux.Get("/", dynamicMiddleware.ThenFunc(app.home))                  // Dynamic middleware
-	mux.Get("/snippet/create", http.HandlerFunc(app.createSnippetForm)) // To display the form
-	mux.Post("/snippet/create", http.HandlerFunc(app.createSnippet))    // To submit the form
-	mux.Get("/snippet/:id", http.HandlerFunc(app.showSnippet))
+	mux.Get("/", dynamicMiddleware.ThenFunc(app.home))
+	mux.Get("/snippet/create", dynamicMiddleware.ThenFunc(app.createSnippetForm)) // To display the form
+	mux.Post("/snippet/create", dynamicMiddleware.ThenFunc(app.createSnippet))    // To submit the form
+	mux.Get("/snippet/:id", dynamicMiddleware.ThenFunc(app.showSnippet))
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Get("/static/", http.StripPrefix("/static", fileServer))

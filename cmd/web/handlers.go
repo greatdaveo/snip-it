@@ -145,6 +145,9 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// To add a confirmation message to the user's session data
+	app.session.Put(r, "flash", "Snippet successfully created!")
+
 	// To redirect the user to the relevant page of the snippet using semantic URL style
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
