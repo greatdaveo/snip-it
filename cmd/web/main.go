@@ -8,24 +8,30 @@ import (
 	"net/http"
 	"os"
 	"snippet-box/pkg/models/mysql"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 )
 
 // To define an application struct to hold the application-wide dependencies
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	session  *sessions.Session
 	// To make the SnippetModel object available to the handlers
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template // templateCache field
 }
 
 func main() {
-	// Tpo create DB Connection Pool
+	// To create DB Connection Pool
 	dsn := flag.String("dsn", "web:webpassword@/snippetbox?parseTime=true", "MySQL database")
-	// To define a new command-line flag with the name 'addr',
+	// To define a command-line flag with the name 'addr',
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	flag.Parse()
+	// To define a command-line flag for the session secret
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret Key for session cookies")
 	flag.Parse()
 
 	// To create a logger for writing information messages
@@ -46,10 +52,16 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// To initialize a new session manager that expires after 12 hours
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
+	// The application dependencies
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
-		// To initialize a mysql.SnippetModel instance & add i the application dependencies
+		session:  session,
+		// To initialize a mysql.SnippetModel instance & add the application dependencies
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache, // templateCache
 	}
