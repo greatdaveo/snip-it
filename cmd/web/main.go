@@ -85,7 +85,7 @@ func main() {
 
 	infoLog.Printf("Starting server on %s", *addr)
 	// To call the ListenAndServe method on the new http.Server struct
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem") // To start the HTTPS server with self-signed TLS certificate
 	errorLog.Fatal(err)
 }
 
