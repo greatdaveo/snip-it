@@ -23,6 +23,7 @@ type application struct {
 	// To make the SnippetModel object available to the handlers
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template // templateCache field
+	users         *mysql.UserModel
 }
 
 func main() {
@@ -65,6 +66,7 @@ func main() {
 		// To initialize a mysql.SnippetModel instance & add the application dependencies
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache, // templateCache
+		users:         &mysql.UserModel{DB: db},
 	}
 
 	// To initialize a tls.Config struct to hold the non-default TLS settings

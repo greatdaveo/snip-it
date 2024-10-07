@@ -151,3 +151,24 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	// To redirect the user to the relevant page of the snippet using semantic URL style
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
+
+// For Authentication
+func (app *application) displayUserRegistrationForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Display the user registration form")
+}
+
+func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Register a new User")
+}
+
+func (app *application) displayLoginUserForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Display the user login form")
+}
+
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Authenticate and login the user")
+}
+
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Logout the user...")
+}
