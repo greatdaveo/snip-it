@@ -89,6 +89,10 @@ func main() {
 		ErrorLog:  errorLog,
 		Handler:   app.routes(),
 		TLSConfig: tlsConfig,
+		// To add Idle, Read and Write timeouts to the server
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
