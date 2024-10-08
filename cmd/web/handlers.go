@@ -154,11 +154,46 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 // For Authentication
 func (app *application) displayUserRegistrationForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Display the user registration form")
+	app.render(w, r, "signup.page.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
 }
 
 func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Register a new User")
+	// To Parse the form data
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// To validate the form contents
+	form := forms.New(r.PostForm)
+	form.Required("name", "email", "password")
+	form.MatchesPattern("email", forms.EmailRx)
+	form.MinLength("password", 6)
+
+	// If there is any error redisplay the registration form
+	if !form.Valid() {
+		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
+		return
+	}
+
+	// To create a new user record in the DB, show err if the user exist
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
+	if err == models.ErrDuplicateEmail {
+		form.Errors.Add("email", "Address is already in use")
+		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	// Otherwise show a confirmation message to the session
+	app.session.Put(r, "flash", "Registration successful!. Please log in.")
+
+	// To redirect the user to the login page
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) displayLoginUserForm(w http.ResponseWriter, r *http.Request) {
