@@ -57,6 +57,9 @@ func main() {
 	// To initialize a new session manager that expires after 12 hours
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
+	//  For CSRF
+	session.Secure = true
+	session.SameSite = http.SameSiteStrictMode
 
 	// The application dependencies
 	app := &application{

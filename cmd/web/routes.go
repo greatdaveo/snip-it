@@ -9,11 +9,10 @@ import (
 
 // The standard flow of control: panicRecovery -> logRequest -> secureHeaders -> servemux -> application handler
 func (app *application) routes() http.Handler {
-
 	// To create a middleware chain containing all standard middleware, which will be used for every request the application uses
 	standardMiddleware := alice.New(app.recoverPanic, app.recoverPanic, secureHeaders)
 	// To create a middleware chain containing the middleware specific to our dynamic application routes
-	dynamicMiddleware := alice.New(app.session.Enable)
+	dynamicMiddleware := alice.New(app.session.Enable, noSurf) // To use the noSurf Middleware on all dynamic routes
 
 	mux := pat.New()
 	mux.Get("/", dynamicMiddleware.ThenFunc(app.home))
