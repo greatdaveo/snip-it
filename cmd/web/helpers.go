@@ -27,12 +27,13 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
-// To add default data to the application
+// To add default data to the templateData struct anytime a template is rendered
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
 	if td == nil {
 		td = &templateData{}
 	}
 
+	td.AuthenticatedUser = app.authenticatedUser(r)
 	td.CurrentYear = time.Now().Year()
 
 	// To add add the flash message to the template data, if on exists
@@ -71,4 +72,9 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 
 	// To write the contents of the buffer to the http.ResponseWriter
 	buf.WriteTo(w)
+}
+
+// To return the ID of the current user from the session, and zero if it is not from an authenticated user
+func (app *application) authenticatedUser(r *http.Request) int {
+	return app.session.GetInt(r, "userID")
 }

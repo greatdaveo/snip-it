@@ -42,3 +42,16 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 	})
 
 }
+
+// To ensure unauthenticated users can't create snippet
+func (app *application) requireAuthenticatedUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// If the user is not authenticated, redirect user to the login page and return the middleware chain so that subsequent handlers won't execute
+		if app.authenticatedUser(r) == 0 {
+			http.Redirect(w, r, "/user/login", http.StatusFound)
+			return
+		}
+		// Otherwise call the next handler in the chain
+		next.ServeHTTP(w, r)
+	})
+}
