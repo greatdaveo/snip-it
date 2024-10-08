@@ -197,13 +197,42 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) displayLoginUserForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Display the user login form")
+	app.render(w, r, "login.page.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
 }
 
 func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Authenticate and login the user")
+	// To parse the form data
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// To check if the credentials are valid
+	form := forms.New(r.PostForm)
+	id, err := app.users.Authenticate(form.Get("email"), form.Get("password"))
+	if err == models.ErrInvalidCredentials {
+		form.Errors.Add("generic", "Email or Password is incorrect!")
+		app.render(w, r, "login.page.tmpl", &templateData{Form: form})
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// To add the id of the current user to the session to make the user logged in
+	app.session.Put(r, "userId", id)
+
+	// To redirect the user to the create snippet page
+	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Logout the user...")
+	// To remove the userID from the session data, so as to make the user logged out
+	app.session.Remove(r, "userID")
+	// To add a flash message
+	app.session.Put(r, "flash", "You've been logged out successfully!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
