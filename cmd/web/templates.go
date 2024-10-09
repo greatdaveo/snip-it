@@ -11,7 +11,7 @@ import (
 // To set the holding structure for any dynamic data to be passed to HTML templates
 type templateData struct {
 	CSRFToken         string          // For CSRF
-	AuthenticatedUser int             // To pass the userID value to HTML template
+	AuthenticatedUser *models.User    // To pass the user details value from the request context
 	CurrentYear       int             // Field for Current Year
 	Flash             string          // Flash field for the flash confirmation message
 	Form              *forms.Form     // Pointer to single form field

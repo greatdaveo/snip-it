@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"snippet-box/pkg/models"
 
 	"github.com/justinas/nosurf"
 )
@@ -49,7 +51,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 func (app *application) requireAuthenticatedUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// If the user is not authenticated, redirect user to the login page and return the middleware chain so that subsequent handlers won't execute
-		if app.authenticatedUser(r) == 0 {
+		if app.authenticatedUser(r) == nil {
 			http.Redirect(w, r, "/user/login", http.StatusFound)
 			return
 		}
@@ -68,4 +70,32 @@ func noSurf(next http.Handler) http.Handler {
 		Secure:   true,
 	})
 	return csrfHandler
+}
+
+// This func fetches the details for the current user from the DB based on the userID in the session, and it adds the details to the request context
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// To check if a userID exist in the session, if not it calls the next handler in the chain
+		exists := app.session.Exists(r, "userID")
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// To fetch the details of the current user from the DB, if no matching record is found remove the (invalid) userID from the session and call the next handler in chain
+		user, err := app.users.Get(app.session.GetInt(r, "userID"))
+		if err == models.ErrNoRecord {
+			app.session.Remove(r, "userID")
+			next.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		// Otherwise, it means the request is from a valid (authenticated) user.
+		// To create a new copy of the request with the user details store in the request context, and call the next handler in the chain( using the new copy of the request)
+		ctx := context.WithValue(r.Context(), contextKeyUser, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

@@ -15,6 +15,11 @@ import (
 	"github.com/golangcollege/sessions"
 )
 
+// To define a custom contextKey type and contextKeyUser so as to have a unique key to store and retrieve user details from request context
+type contextKey string
+
+var contextKeyUser = contextKey("user")
+
 // To define an application struct to hold the application-wide dependencies
 type application struct {
 	errorLog *log.Logger
